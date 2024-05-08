@@ -6,7 +6,7 @@ export default function Home() {
     <main className="">
       {/* <MapComponent /> */}
 
-      {/* <DrawOnMap /> */}
+      <DrawOnMap />
     </main>
   );
 }
