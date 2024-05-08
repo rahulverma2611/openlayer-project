@@ -42,9 +42,11 @@ const MapComponent = () => {
       setZoom(newZoom);
     });
 
+    // ==========================blue pinpoint ================================
+
     const overlay = new Overlay({
       position: posDelhi,
-      element: document.getElementById("overlay"),
+      element: popupOverlay.getElement(), // Corrected: Should be popupOverlay.getElement()
       positioning: "center-center",
       stopEvent: false,
     });
@@ -73,7 +75,7 @@ const MapComponent = () => {
       overlay.setPosition(coordinate);
     });
 
-    setMap(mapInstance);
+    setMap(null);
 
     return () => {
       mapInstance.setTarget(undefined);
@@ -82,8 +84,9 @@ const MapComponent = () => {
 
   return (
     <div>
-      <div ref={mapRef} id="map" className="h-[100vh] w-[100%]" />
-      <div className="blue-circle" id="overlay" title="overlay" />
+      <div ref={mapRef} id="map" className="h-[70vh] w-[100%]" />
+      {/* Corrected: Use popupOverlay.getElement() instead of id */}
+      <div ref={popupOverlay.getElement()} title="overlay" />
       <div
         className="blue-circle"
         id="popup-overlay"
