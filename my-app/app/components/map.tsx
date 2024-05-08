@@ -1,6 +1,5 @@
 "use client";
-import React, { Component, RefObject } from "react";
-import ReactDOM from "react-dom";
+import React, { useEffect, useRef, useState } from "react";
 import Map from "ol/Map.js";
 import View from "ol/View.js";
 import Overlay from "ol/Overlay.js";
@@ -12,107 +11,90 @@ import * as proj from "ol/proj";
 import "./map.css";
 
 const posDelhi = proj.fromLonLat([77.1025, 28.7041]);
-interface MapComponentProps {}
 
-interface MapComponentState {
-  center: [number, number];
-  zoom: number;
-}
+const MapComponent = () => {
+  const mapRef = useRef(null);
+  const [map, setMap] = useState(null);
+  const [popupOverlay] = useState(
+    new Overlay({ element: document.createElement("div") })
+  );
+  const [center, setCenter] = useState(posDelhi);
+  const [zoom, setZoom] = useState(10);
 
-export default class MapComponent extends Component<
-  MapComponentProps,
-  MapComponentState
-> {
-  mapRef: RefObject<HTMLDivElement>;
-  map: Map;
-  popupOverlay: Overlay;
-
-  constructor(props: MapComponentProps) {
-    super(props);
-    this.state = { center: posDelhi, zoom: 10 };
-    this.mapRef = React.createRef();
-    this.popupOverlay = new Overlay({
-      element: document.createElement("div"),
-    });
-
-    this.map = new Map({
-      target: null, // set this in componentDidMount
+  useEffect(() => {
+    const mapInstance = new Map({
+      target: mapRef.current,
       layers: [
         new LayerTile({
           source: new SourceOSM(),
         }),
       ],
       view: new View({
-        center: this.state.center,
-        zoom: this.state.zoom,
+        center: center,
+        zoom: zoom,
       }),
     });
-  }
 
-  componentDidMount() {
-    if (this.mapRef.current) {
-      this.map.setTarget(this.mapRef.current);
-      // Listen to map changes
-      this.map.on("moveend", () => {
-        let center = this.map.getView().getCenter() as [number, number];
-        let zoom = this.map.getView().getZoom();
-        this.setState({ center, zoom });
-      });
+    mapInstance.on("moveend", () => {
+      let newCenter = mapInstance.getView().getCenter();
+      let newZoom = mapInstance.getView().getZoom();
+      setCenter(newCenter);
+      setZoom(newZoom);
+    });
 
-      // Basic overlay
-      const overlay = new Overlay({
-        position: posDelhi,
-        element: document.getElementById("overlay") as HTMLElement,
-        positioning: "center-center",
-        stopEvent: false,
-      });
+    const overlay = new Overlay({
+      position: posDelhi,
+      element: document.getElementById("overlay"),
+      positioning: "center-center",
+      stopEvent: false,
+    });
 
-      this.map.addOverlay(overlay);
-      const content = document.getElementById("popup-content");
-      const closer = document.getElementById("popup-closer");
+    mapInstance.addOverlay(overlay);
 
-      // Popup showing the position the user clicked
-      this.popupOverlay.setElement(
-        document.getElementById("popup-overlay") as HTMLElement
-      );
+    const content = document.getElementById("popup-content");
+    const closer = document.getElementById("popup-closer");
 
-      // Listener to add Popup overlay showing the position the user clicked
-      closer?.addEventListener("click", () => {
-        overlay.setPosition(undefined);
-        closer.blur();
-      });
-
-      this.map.on("singleclick", (evt) => {
-        const coordinate = evt.coordinate;
-        const hdms = toStringHDMS(toLonLat(coordinate));
-
-        if (content)
-          content.innerHTML =
-            "<p>Location Coordinates:</p><code>" + hdms + "</code>";
-        overlay.setPosition(coordinate);
-      });
+    const popupOverlayElement = document.getElementById("popup-overlay");
+    if (popupOverlayElement) {
+      popupOverlay.setElement(popupOverlayElement);
     }
-  }
 
-  componentWillUnmount() {
-    this.map.setTarget(undefined);
-  }
+    closer?.addEventListener("click", () => {
+      overlay.setPosition(undefined);
+    });
 
-  render() {
-    return (
-      <div>
-        <div ref={this.mapRef} id="map" className="h-[100vh] w-[100%]" />
-        <div className="blue-circle" id="overlay" title="overlay" />
-        <div
-          className="blue-circle"
-          id="popup-overlay"
-          title="Welcome to OpenLayers"
-        />
-        <div className="ol-popup" id="popup">
-          <a href="#" id="popup-closer" className="ol-popup-closer" />
-          <div id="popup-content" style={{ color: "black" }} />
-        </div>
+    mapInstance.on("singleclick", (evt) => {
+      const coordinate = evt.coordinate;
+      const hdms = toStringHDMS(toLonLat(coordinate));
+      if (content) {
+        content.innerHTML =
+          "<p>Location Coordinates:</p><code>" + hdms + "</code>";
+      }
+      overlay.setPosition(coordinate);
+    });
+
+    setMap(mapInstance);
+
+    return () => {
+      mapInstance.setTarget(undefined);
+    };
+  }, []);
+
+  return (
+    <div>
+      <div ref={mapRef} id="map" className="h-[100vh] w-[100%]" />
+      <div className="blue-circle" id="overlay" title="overlay" />
+      <div
+        className="blue-circle"
+        id="popup-overlay"
+        title="Welcome to OpenLayers"
+      />
+      <div className="ol-popup" id="popup">
+        <a href="#" id="popup-closer" className="ol-popup-closer" />
+        <div id="popup-content" style={{ color: "black" }} />
       </div>
-    );
-  }
-}
+    </div>
+  );
+};
+
+export default MapComponent;
