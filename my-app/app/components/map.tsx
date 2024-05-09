@@ -14,8 +14,10 @@ const posDelhi = proj.fromLonLat([77.1025, 28.7041]);
 
 const MapComponent = () => {
   const mapRef = useRef(null);
+  const popupOverlayRef = useRef<HTMLDivElement>(null);
+
   const [map, setMap] = useState<null>(null);
-  const [popupOverlay] = useState<object>(
+  const [popupOverlay] = useState<Overlay>(
     new Overlay({ element: document.createElement("div") })
   );
   const [center, setCenter] = useState(posDelhi);
@@ -102,11 +104,18 @@ const MapComponent = () => {
     };
   }, []);
 
+  useEffect(() => {
+    if (popupOverlayRef.current) {
+      popupOverlay.setElement(popupOverlayRef.current);
+    }
+  }, []);
+
   return (
     <div>
       <div ref={mapRef} id="map" className="h-[90vh] w-[100%]" />
       {/* Corrected: Use popupOverlay.getElement() instead of id */}
-      <div ref={popupOverlay.getElement()} title="overlay" />
+      <div ref={popupOverlayRef} title="overlay" />
+
       <div
         className="blue-circle"
         id="popup-overlay"

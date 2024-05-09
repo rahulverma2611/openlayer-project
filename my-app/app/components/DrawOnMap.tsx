@@ -43,7 +43,7 @@ const DrawOnMap: React.FC = () => {
       ],
     });
 
-    const extent = get("EPSG:3857").getExtent().slice();
+    const extent = get("EPSG:3857")?.getExtent()?.slice() ?? [];
     extent[0] += extent[0];
     extent[2] += extent[2];
 
@@ -91,7 +91,7 @@ const DrawOnMap: React.FC = () => {
 
   return (
     <div>
-      <div ref={mapRef} className="map h-[100vh] w-[100%]"></div>{" "}
+      <div ref={mapRef} className="map h-[95vh] w-[100%]"></div>{" "}
       <form>
         <label htmlFor="type">Geometry type &nbsp;</label>
         <select style={{ color: "black" }} id="type">
