@@ -1,12 +1,9 @@
-import DrawOnMap from "./components/DrawOnMap";
-import MapComponent from "./components/map";
+import HomePage from "./home/page";
 
 export default function Home() {
   return (
     <main className="">
-      {/* <MapComponent /> */}
-
-      <DrawOnMap />
+      <HomePage />
     </main>
   );
 }

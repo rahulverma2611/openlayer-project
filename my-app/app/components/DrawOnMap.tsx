@@ -91,15 +91,13 @@ const DrawOnMap: React.FC = () => {
 
   return (
     <div>
-      <div ref={mapRef} className="map h-[70vh] w-[100%]"></div>{" "}
-      {/* Changed from id="map" to ref={mapRef} */}
+      <div ref={mapRef} className="map h-[100vh] w-[100%]"></div>{" "}
       <form>
         <label htmlFor="type">Geometry type &nbsp;</label>
         <select style={{ color: "black" }} id="type">
           <option value="Point">Point</option>
-          <option value="LineString">LineString</option>
           <option value="Polygon">Polygon</option>
-          <option value="Circle">Circle</option>
+          <option value="LineString">Line</option>
         </select>
       </form>
     </div>
